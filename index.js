@@ -34,12 +34,23 @@ async function run() {
   try {
     // databse & collection
     const menuCollection = client.db("bistroBossDB").collection("menu");
+    const cartCollection = client.db("bistroBossDB").collection("cart");
 
-    // api endpoints
+    // <------------api endpoints------------>
+
+    // GET requests
+
     app.get("/api/v1/menu", async (req, res) => {
       const cursor = menuCollection.find();
       const result = await cursor.toArray();
 
+      res.send(result);
+    });
+
+    // POST requests
+    app.post("/api/v1/user/add-cart", async (req, res) => {
+      const itemInfo = req.body;
+      const result = await cartCollection.insertOne(itemInfo);
       res.send(result);
     });
 
