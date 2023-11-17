@@ -47,6 +47,14 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/api/v1/user/get-cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { userId: id };
+      const cursor = cartCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // POST requests
     app.post("/api/v1/user/add-cart", async (req, res) => {
       const itemInfo = req.body;
