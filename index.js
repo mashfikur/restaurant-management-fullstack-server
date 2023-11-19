@@ -35,6 +35,7 @@ async function run() {
     // databse & collection
     const menuCollection = client.db("bistroBossDB").collection("menu");
     const cartCollection = client.db("bistroBossDB").collection("cart");
+    const usersCollection = client.db("bistroBossDB").collection("users");
 
     // <------------api endpoints------------>
 
@@ -67,6 +68,20 @@ async function run() {
       const itemInfo = req.body;
       const result = await cartCollection.insertOne(itemInfo);
       res.send(result);
+    });
+
+    app.post("/api/v1/add-user", async (req, res) => {
+      const userInfo = req.body;
+
+      const existed = await usersCollection.findOne({ uid: userInfo.uid });
+
+      if (!existed) {
+        const result = await usersCollection.insertOne(userInfo);
+
+        res.send(result);
+      } else {
+        res.send({ message: "User Alredy Listed" });
+      }
     });
 
     // Send a ping to confirm a successful connection
