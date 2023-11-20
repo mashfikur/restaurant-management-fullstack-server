@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -88,6 +89,16 @@ async function run() {
       } else {
         res.send({ message: "User Alredy Listed" });
       }
+    });
+
+    // creating jwt tokens
+    app.post("/api/v1/auth/create-token", async (req, res) => {
+      const { uid } = req.body;
+      const token = jwt.sign({ uid }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res.send({ token });
     });
 
     // DELETE request
