@@ -63,6 +63,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/api/v1/get-users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+
+      res.send(result);
+    });
+
     // POST requests
     app.post("/api/v1/user/add-cart", async (req, res) => {
       const itemInfo = req.body;
@@ -82,6 +88,14 @@ async function run() {
       } else {
         res.send({ message: "User Alredy Listed" });
       }
+    });
+
+    // DELETE request
+    app.delete("/api/v1/user/delete-item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { itemId: id };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
