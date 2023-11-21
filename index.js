@@ -39,21 +39,22 @@ async function run() {
     const usersCollection = client.db("bistroBossDB").collection("users");
 
     // <---------Custom Middlewares------------>
-    const verfiyToken = (req, res, next) => {
-      const token = req?.headers?.authorization.split(" ")[1];
-
-      if (!token) {
-        res.status(401).send({ message: "Unauthorized Access" });
-        return;
+    const verfiyToken = async (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "Unauthorized Access" });
       }
+
+      const token = req?.headers?.authorization.split(" ")[1];
+      console.log(token);
 
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-          res.status(401).send({ message: "Unauthorized Access" });
-          return;
+          console.log("token didn't match ");
+          return res.status(401).send({ message: "Unauthorized Access" });
         }
 
         req.decoded = decoded;
+        console.log(decoded);
         next();
       });
     };
@@ -88,7 +89,8 @@ async function run() {
     app.get("/api/v1/user/get-cart/:id", verfiyToken, async (req, res) => {
       const id = req.params.id;
       const { uid } = req.decoded;
-      console.log(uid === id);
+      // console.log(uid);
+      // console.log(uid === id);
       if (uid !== id) {
         res.status(403).send({ message: "Forbidden Access" });
         return;
@@ -107,15 +109,10 @@ async function run() {
       res.send(result);
     });
 
-    app.get(
-      "/api/v1/get-users/:id",
-      verfiyToken,
-      verifyAdmin,
-      async (req, res) => {
-        const result = await usersCollection.find().toArray();
-        res.send(result);
-      }
-    );
+    app.get("/api/v1/get-users", verfiyToken, verifyAdmin, async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
 
     app.get("/api/v1/user/check-admin/:id", async (req, res) => {
       const id = req.params.id;
