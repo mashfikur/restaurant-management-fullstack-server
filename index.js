@@ -101,6 +101,26 @@ async function run() {
       res.send({ token });
     });
 
+    // PATCH request
+    app.patch("/api/v1/user/make-admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { uid: id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+
+      res.send(result);
+    });
+
     // DELETE request
     app.delete("/api/v1/user/delete-item/:id", async (req, res) => {
       const id = req.params.id;
