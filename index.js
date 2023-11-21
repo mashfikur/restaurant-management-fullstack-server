@@ -16,6 +16,27 @@ app.use(
 );
 app.use(express.json());
 
+// <---------Custom Middlewares------------>
+const verfiyToken = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    res.status(401).send({ message: "Unauthorized Access" });
+    return;
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      res.status(403).send({ message: "Forbidden Access" });
+      return;
+    }
+
+    console.log(decoded)
+    req.decoded = decoded;
+    next();
+  });
+};
+
 app.get("/", async (req, res) => {
   res.send(" Server is Running");
 });
@@ -40,7 +61,7 @@ async function run() {
 
     // <------------api endpoints------------>
 
-    // GET requests
+    // ----------GET requests------------
 
     app.get("/api/v1/menu", async (req, res) => {
       const cursor = menuCollection.find();
@@ -49,7 +70,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/api/v1/user/get-cart/:id", async (req, res) => {
+    app.get("/api/v1/user/get-cart/:id", verfiyToken, async (req, res) => {
       const id = req.params.id;
       const query = { userId: id };
       const cursor = cartCollection.find(query);
@@ -81,7 +102,8 @@ async function run() {
       }
     });
 
-    // POST requests
+    // ----------POST requests------------
+
     app.post("/api/v1/user/add-cart", async (req, res) => {
       const itemInfo = req.body;
       const result = await cartCollection.insertOne(itemInfo);
@@ -112,7 +134,7 @@ async function run() {
       res.send({ token });
     });
 
-    // PATCH request
+    //----------PATCH requests------------
     app.patch("/api/v1/user/make-admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { uid: id };
@@ -132,7 +154,7 @@ async function run() {
       res.send(result);
     });
 
-    // DELETE request
+    // ----------DELETE requests------------
     app.delete("/api/v1/user/delete-item/:id", async (req, res) => {
       const id = req.params.id;
       const query = { itemId: id };
