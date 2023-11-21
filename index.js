@@ -66,8 +66,19 @@ async function run() {
 
     app.get("/api/v1/get-users", async (req, res) => {
       const result = await usersCollection.find().toArray();
-
       res.send(result);
+    });
+
+    app.get("/api/v1/user/check-admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { uid: id };
+      const user = await usersCollection.findOne(query);
+
+      if (user?.role === "admin") {
+        res.send({ admin: true });
+      } else {
+        res.send({ admin: false });
+      }
     });
 
     // POST requests
