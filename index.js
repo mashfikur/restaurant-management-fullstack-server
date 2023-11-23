@@ -45,16 +45,14 @@ async function run() {
       }
 
       const token = req?.headers?.authorization.split(" ")[1];
-      console.log(token);
 
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-          console.log("token didn't match ");
           return res.status(401).send({ message: "Unauthorized Access" });
         }
 
         req.decoded = decoded;
-        console.log(decoded);
+
         next();
       });
     };
@@ -65,13 +63,11 @@ async function run() {
       const query = { uid: uid };
 
       const user = await usersCollection.findOne(query);
-      console.log(user);
+
       if (user.role === "admin") {
         next();
       } else {
-        res.status(403).send({ message: "Forbidden Access" });
-        console.log("this is imposter");
-        return;
+        return res.status(403).send({ message: "Forbidden Access" });
       }
     };
 
@@ -89,8 +85,6 @@ async function run() {
     app.get("/api/v1/user/get-cart/:id", verfiyToken, async (req, res) => {
       const id = req.params.id;
       const { uid } = req.decoded;
-      // console.log(uid);
-      // console.log(uid === id);
       if (uid !== id) {
         res.status(403).send({ message: "Forbidden Access" });
         return;
@@ -146,6 +140,12 @@ async function run() {
       } else {
         res.send({ message: "User Alredy Listed" });
       }
+    });
+
+    app.post("/api/v1/menu/add-item", async (req, res) => {
+      const itemInfo = req.body;
+      const result = await menuCollection.insertOne(itemInfo);
+      res.send(result);
     });
 
     // creating jwt tokens
